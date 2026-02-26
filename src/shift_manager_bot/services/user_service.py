@@ -1,0 +1,63 @@
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from shift_manager_bot.database.models.user import User, UserRole
+
+
+class UserService:
+    async def get_by_telegram_id(
+        self, session: AsyncSession, telegram_id: int
+    ) -> User | None:
+        result = await session.execute(
+            select(User).where(User.telegram_id == telegram_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def create_user(
+        self,
+        session: AsyncSession,
+        telegram_id: int,
+        full_name: str,
+        username: str | None = None,
+        role: UserRole = UserRole.PENDING,
+    ) -> User:
+        user = User(
+            telegram_id=telegram_id, full_name=full_name, username=username, role=role
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
+
+    async def get_or_create(
+        self,
+        session: AsyncSession,
+        telegram_id: int,
+        full_name: str,
+        username: str | None = None,
+    ) -> tuple[User, bool]:
+        user = await self.get_by_telegram_id(session, telegram_id)
+        if user is not None:
+            return user, False
+        user = await self.create_user(
+            session, telegram_id=telegram_id, full_name=full_name, username=username
+        )
+        return user, True
+
+    async def update_role(
+        self, session: AsyncSession, user: User, new_role: UserRole
+    ) -> User:
+        user.role = new_role
+        await session.commit()
+        await session.refresh(user)
+        return user
+
+    async def deactivate(self, session: AsyncSession, user: User) -> User:
+        user.is_active = False
+        await session.commit()
+        await session.refresh(user)
+        return user
+
+    async def get_all_active(self, session: AsyncSession) -> list[User]:
+        result = await session.execute(select(User).where(User.is_active))
+        return list(result.scalars().all())
