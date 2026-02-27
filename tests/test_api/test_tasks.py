@@ -57,7 +57,7 @@ async def test_manager_can_create_task(
     app.dependency_overrides[get_db] = override_get_db
 
     response = await client.post(
-        "/api/tasks", json={"title": "Clean tables", "employee_id": mock_employee.id}
+        "/api/tasks/", json={"title": "Clean tables", "employee_id": mock_employee.id}
     )
     app.dependency_overrides.clear()
 
@@ -75,7 +75,7 @@ async def test_employee_cannot_create_task(
     app.dependency_overrides[get_db] = override_get_db
 
     response = await client.post(
-        "/api/tasks", json={"title": "Clean tables", "employee_id": mock_employee.id}
+        "/api/tasks/", json={"title": "Clean tables", "employee_id": mock_employee.id}
     )
     app.dependency_overrides.clear()
 
