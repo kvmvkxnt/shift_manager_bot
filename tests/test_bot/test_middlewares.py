@@ -24,13 +24,11 @@ def make_message(tg_user: TgUser) -> Message:
 
 @pytest.mark.asyncio
 async def test_db_middleware_injects_session(db_session: AsyncSession) -> None:
-    middleware = DbSessionMiddleware(session_factory=lambda: db_session)
-
     handler = AsyncMock()
     event = make_message(make_tg_user())
     data: dict[str, Any] = {}
 
-    async def mock_session_factory():
+    async def mock_session_factory() -> AsyncSession:
         return db_session
 
     middleware = DbSessionMiddleware(session_factory=mock_session_factory)

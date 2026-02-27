@@ -1,19 +1,23 @@
 from typing import Any, Awaitable, Callable
-from unittest.mock import AsyncMock
 
-from aiogram.types import Message
+from aiogram import BaseMiddleware
+from aiogram.types import TelegramObject
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class DbSessionMiddleware:
+class DbSessionMiddleware(BaseMiddleware):
     def __init__(
         self,
-        session_factory: Callable[[], AsyncSession]
-        | Callable[[], Awaitable[AsyncSession]],
+        session_factory: Callable[[], Awaitable[AsyncSession]],
     ) -> None:
-        pass
+        self.session_factory = session_factory
 
     async def __call__(
-        self, handler: AsyncMock, event: Message, data: dict[str, Any]
-    ) -> None:
-        pass
+        self,
+        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: dict[str, Any],
+    ) -> Any:
+        session = await self.session_factory()
+        data["session"] = session
+        return await handler(event, data)
