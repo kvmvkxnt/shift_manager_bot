@@ -43,6 +43,18 @@ redis = ["redis[hiredis] (>=6.2.0,<8)"]
 signature = ["cryptography (>=46.0.0)"]
 
 [[package]]
+name = "aiogram-tests"
+version = "1.0.3"
+description = "A library for testing your bots on aiogram"
+optional = false
+python-versions = "*"
+groups = ["dev"]
+files = [
+    {file = "aiogram_tests-1.0.3-py3-none-any.whl", hash = "sha256:b92fc4dbb652ed115bbcef08d2e020a8e86e575217fb44876d926b5cd681aca0"},
+    {file = "aiogram_tests-1.0.3.tar.gz", hash = "sha256:cdc78e9a65e205a744e944361a844c0f764f7777718dde087821000d49d354b3"},
+]
+
+[[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
 description = "Happy Eyeballs for asyncio"
@@ -1876,4 +1888,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.14,<3.15"
-content-hash = "0a3190070641c420c20ea18c60fe9124cd52c675adf36880e666dcbc9e6afe03"
+content-hash = "926c3fe86858cc001fa30b2a399280cabce92d1574ba2e191dca84f02e4476fc"

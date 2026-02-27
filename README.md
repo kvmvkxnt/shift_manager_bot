@@ -110,5 +110,41 @@ shift_manager_bot/
   aiogram handlers built on top of the same services.
 8. Scheduler.
   APScheduler jobs — reminders etc.
-9. Tests.
-  Written alongside or right after each layer.
+
+### Steps 7 and 8
+
+**Middlewares first** — just like FastAPI had `dependencies.py`, aiogram needs middlewares
+that run before every handler:
+
+- `db.py` — injects a database session into every handler
+- `auth.py` — loads the current user from DB based on Telegram ID, injects them
+
+---
+
+#### Handlers
+
+**Common** (`common.py`)
+
+- `/start` — register user if new, show role-appropriate menu
+- `/help` — show available commands based on role
+
+**Employee** (`employee.py`)
+
+- My shifts — list upcoming shifts with confirm/decline buttons
+- My tasks — list tasks with status update buttons
+- My stats — simple summary
+
+**Manager** (`manager.py`)
+
+- Create shift — FSM flow (date → time → max employees → assign employees)
+- Create task — FSM flow (title → description → assign to → deadline)
+- My team — list employees
+- Team stats — performance overview
+
+---
+
+#### Testing approach for aiogram
+
+Aiogram handlers are harder to test than FastAPI routes. We'll use `aiogram`'s
+built-in testing utilities — specifically `MockedBot` and `InMemoryStorage`. We
+mock incoming messages and check what the bot replies.
