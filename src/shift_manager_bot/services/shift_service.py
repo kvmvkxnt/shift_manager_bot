@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from shift_manager_bot.database.models.shift import (
     AssignmentStatus,
@@ -97,3 +98,23 @@ class ShiftService:
             select(Shift).where(Shift.starts_at >= now, Shift.starts_at <= deadline)
         )
         return list(result.scalars().all())
+
+    async def get_employee_assignments(
+        self, session: AsyncSession, employee_id: int
+    ) -> list[ShiftAssignment]:
+        result = await session.execute(
+            select(ShiftAssignment)
+            .where(ShiftAssignment.employee_id == employee_id)
+            .options(selectinload(ShiftAssignment.shift))
+        )
+        return list(result.scalars().all())
+
+    async def get_assignment_by_id(
+        self, session: AsyncSession, assignment_id: int
+    ) -> ShiftAssignment | None:
+        result = await session.execute(
+            select(ShiftAssignment)
+            .where(ShiftAssignment.id == assignment_id)
+            .options(selectinload(ShiftAssignment.shift))
+        )
+        return result.scalar_one_or_none()
