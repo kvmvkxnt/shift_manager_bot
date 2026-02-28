@@ -1,8 +1,10 @@
-from typing import Any
 import random
-import pytest
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock
-from aiogram.types import Message, Chat, User as TgUser
+
+import pytest
+from aiogram.types import Chat, Message
+from aiogram.types import User as TgUser
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.bot.middlewares.auth import AuthMiddleware

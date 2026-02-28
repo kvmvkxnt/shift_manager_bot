@@ -1,7 +1,9 @@
 from typing import Any
-from aiogram.types import Message
-from aiogram.filters import Command
+
 from aiogram import Router
+from aiogram.filters import Command
+from aiogram.types import Message
+
 from shift_manager_bot.database.models.user import User, UserRole
 
 router = Router()

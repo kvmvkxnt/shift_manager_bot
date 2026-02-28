@@ -1,5 +1,6 @@
-from fastapi import Depends, HTTPException, Header, status
 from typing import AsyncGenerator
+
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from telegram_init_data import parse, validate
 from telegram_init_data.exceptions import (

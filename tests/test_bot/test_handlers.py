@@ -1,10 +1,13 @@
 import random
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
-from aiogram.types import User as TgUser, Message, Chat
-from sqlalchemy.ext.asyncio import AsyncSession
-from shift_manager_bot.database.models.user import User, UserRole
+
 import pytest
+from aiogram.types import Chat, Message
+from aiogram.types import User as TgUser
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from shift_manager_bot.database.models.user import User, UserRole
 
 
 def make_tg_user(user_id: int = 123456789) -> TgUser:

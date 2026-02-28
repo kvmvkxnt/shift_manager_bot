@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +12,6 @@ from shift_manager_bot.database.models.shift import (
 )
 from shift_manager_bot.database.models.user import User, UserRole
 from shift_manager_bot.services.shift_service import ShiftService
-
 
 router = APIRouter()
 

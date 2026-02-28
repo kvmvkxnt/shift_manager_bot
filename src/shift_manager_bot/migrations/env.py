@@ -1,13 +1,13 @@
 import asyncio
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from alembic import context
 from shift_manager_bot.config import settings
 from shift_manager_bot.database.base import Base
-from shift_manager_bot.database.models import user, shift, task
+from shift_manager_bot.database.models import shift, task, user
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

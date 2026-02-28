@@ -1,15 +1,16 @@
 import random
-import pytest
 from datetime import datetime, timedelta, timezone
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shift_manager_bot.database.models.user import User, UserRole
-from shift_manager_bot.services.shift_service import ShiftService
 from shift_manager_bot.database.models.shift import (
     AssignmentStatus,
     Shift,
     ShiftAssignment,
 )
+from shift_manager_bot.database.models.user import User, UserRole
+from shift_manager_bot.services.shift_service import ShiftService
 
 
 @pytest.fixture

@@ -1,7 +1,8 @@
-import pytest
 import random
 
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from shift_manager_bot.database.models.user import User, UserRole
 from shift_manager_bot.services.user_service import UserService
 

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from shift_manager_bot.api.routes import users, shifts, tasks
 
+from shift_manager_bot.api.routes import shifts, tasks, users
 
 app = FastAPI(title="Shift Manager API")
 

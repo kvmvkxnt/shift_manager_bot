@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import BigInteger, Boolean, DateTime, String, func, Enum as SqlEnum
+from sqlalchemy import BigInteger, Boolean, DateTime, String, func
+from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from shift_manager_bot.database.base import Base

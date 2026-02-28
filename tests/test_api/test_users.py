@@ -1,7 +1,9 @@
-from typing import AsyncGenerator
-import pytest
 import random
+from typing import AsyncGenerator
+
+import pytest
 from httpx import ASGITransport, AsyncClient
+
 from shift_manager_bot.api.dependencies import get_current_user
 from shift_manager_bot.api.router import app
 from shift_manager_bot.database.models.user import User, UserRole

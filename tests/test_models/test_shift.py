@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta, timezone
-import pytest
 import random
+from datetime import datetime, timedelta, timezone
+
+import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

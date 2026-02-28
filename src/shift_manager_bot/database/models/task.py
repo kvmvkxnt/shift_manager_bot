@@ -1,8 +1,10 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import DateTime, ForeignKey, String, Enum as SqlEnum, func
+from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from shift_manager_bot.database.base import Base
 from shift_manager_bot.database.models.user import User
 

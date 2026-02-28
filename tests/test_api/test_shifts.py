@@ -1,17 +1,18 @@
-import pytest
 import random
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import AsyncGenerator
-from httpx import AsyncClient, ASGITransport
 
-from shift_manager_bot.api.router import app
+import pytest
+from httpx import ASGITransport, AsyncClient
+
 from shift_manager_bot.api.dependencies import get_current_user, get_db
-from shift_manager_bot.database.models.user import User, UserRole
+from shift_manager_bot.api.router import app
 from shift_manager_bot.database.models.shift import (
+    AssignmentStatus,
     Shift,
     ShiftAssignment,
-    AssignmentStatus,
 )
+from shift_manager_bot.database.models.user import User, UserRole
 from shift_manager_bot.services.shift_service import ShiftService
 
 

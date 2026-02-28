@@ -1,6 +1,7 @@
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
+
 from shift_manager_bot.config import settings
 from shift_manager_bot.database.base import Base
 
