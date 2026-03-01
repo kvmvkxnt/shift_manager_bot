@@ -10,6 +10,6 @@ class CreateShiftStates(StatesGroup):
 
 class CreateTaskStates(StatesGroup):
     waiting_for_title = State()
-    waiting_for_desciption = State()
+    waiting_for_description = State()
     waiting_for_employee = State()
     waiting_for_deadline = State()
