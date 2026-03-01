@@ -121,7 +121,10 @@ async def test_my_shifts_shows_shifts(
 
     await cmd_my_shifts(message, data)
 
+    shift, assignment = shift_with_assignment
     message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert str(shift.id) in response_text
 
 
 @pytest.mark.asyncio
@@ -197,6 +200,8 @@ async def test_my_tasks_shows_tasks(
     await cmd_my_tasks(message, data)
 
     message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert employee_task.title in response_text
 
 
 @pytest.mark.asyncio
