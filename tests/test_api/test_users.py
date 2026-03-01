@@ -3,8 +3,9 @@ from typing import AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from shift_manager_bot.api.dependencies import get_current_user
+from shift_manager_bot.api.dependencies import get_current_user, get_db
 from shift_manager_bot.api.router import app
 from shift_manager_bot.database.models.user import User, UserRole
 
@@ -63,12 +64,21 @@ async def test_get_me_unauthorized(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_manager_can_list_team(client: AsyncClient, mock_manager: User) -> None:
+async def test_manager_can_list_team(
+    client: AsyncClient, mock_manager: User, db_session: AsyncSession
+) -> None:
+    async def override_get_db():
+        yield db_session
+
     app.dependency_overrides[get_current_user] = lambda: mock_manager
+    app.dependency_overrides[get_db] = override_get_db
     response = await client.get("/api/users/team")
     app.dependency_overrides.clear()
 
     assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert any(u["id"] == mock_manager.id for u in data)
 
 
 @pytest.mark.asyncio
