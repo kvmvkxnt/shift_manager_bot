@@ -3,7 +3,7 @@ from enum import Enum
 
 from sqlalchemy import BigInteger, Boolean, DateTime, String, func
 from sqlalchemy import Enum as SqlEnum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from shift_manager_bot.database.base import Base
 
@@ -28,6 +28,13 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=True, server_default="true"
     )
+    manager_id: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
+    )
+
+    manager: Mapped["User | None"] = relationship(
+        foreign_keys=[manager_id], remote_side="User.id"
     )
