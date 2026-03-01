@@ -10,14 +10,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.types import User as TgUser
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shift_manager_bot.bot.callbacks import ShiftCallbackData, TaskCallbackData
 from shift_manager_bot.bot.states import CreateShiftStates, CreateTaskStates
-from shift_manager_bot.database.models.shift import (
-    AssignmentStatus,
-    Shift,
-    ShiftAssignment,
-)
-from shift_manager_bot.database.models.task import Task, TaskStatus
 from shift_manager_bot.database.models.user import User, UserRole
 
 
@@ -66,11 +59,12 @@ async def manager(db_session: AsyncSession) -> User:
 
 
 @pytest.fixture
-async def employee(db_session: AsyncSession) -> User:
+async def employee(db_session: AsyncSession, manager: User) -> User:
     user = User(
         telegram_id=random.randint(3800000000, 3899999999),
         full_name="Test Employee",
         role=UserRole.EMPLOYEE,
+        manager_id=manager.id,
     )
     db_session.add(user)
     await db_session.commit()
@@ -113,15 +107,14 @@ async def test_my_team_empty(db_session: AsyncSession, manager: User) -> None:
 
 # Create shift FSM tests
 @pytest.mark.asyncio
-async def test_create_shift_start(db_session: AsyncSession, manager: User) -> None:
+async def test_create_shift_start(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import cmd_create_shift
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user)
     state = await make_fsm_context()
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await cmd_create_shift(message, state, data)
+    await cmd_create_shift(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -131,7 +124,7 @@ async def test_create_shift_start(db_session: AsyncSession, manager: User) -> No
 
 
 @pytest.mark.asyncio
-async def test_create_shift_date_valid(db_session: AsyncSession, manager: User) -> None:
+async def test_create_shift_date_valid(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_shift_date
 
     tg_user = make_tg_user(manager.telegram_id)
@@ -139,9 +132,8 @@ async def test_create_shift_date_valid(db_session: AsyncSession, manager: User) 
     message = make_message(tg_user, text=tomorrow)
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_date)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_date(message, state, data)
+    await process_shift_date(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -151,18 +143,15 @@ async def test_create_shift_date_valid(db_session: AsyncSession, manager: User) 
 
 
 @pytest.mark.asyncio
-async def test_create_shift_date_invalid(
-    db_session: AsyncSession, manager: User
-) -> None:
+async def test_create_shift_date_invalid(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_shift_date
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user, text="not-a-date")
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_date)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_date(message, state, data)
+    await process_shift_date(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -172,7 +161,7 @@ async def test_create_shift_date_invalid(
 
 
 @pytest.mark.asyncio
-async def test_create_shift_time_valid(db_session: AsyncSession, manager: User) -> None:
+async def test_create_shift_time_valid(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_shift_time
 
     tg_user = make_tg_user(manager.telegram_id)
@@ -180,9 +169,8 @@ async def test_create_shift_time_valid(db_session: AsyncSession, manager: User) 
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_time)
     await state.update_data(date="2026-12-01")
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_time(message, state, data)
+    await process_shift_time(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -192,9 +180,7 @@ async def test_create_shift_time_valid(db_session: AsyncSession, manager: User) 
 
 
 @pytest.mark.asyncio
-async def test_create_shift_time_invalid(
-    db_session: AsyncSession, manager: User
-) -> None:
+async def test_create_shift_time_invalid(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_shift_time
 
     tg_user = make_tg_user(manager.telegram_id)
@@ -202,9 +188,8 @@ async def test_create_shift_time_invalid(
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_time)
     await state.update_data(date="2026-12-01")
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_time(message, state, data)
+    await process_shift_time(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -214,9 +199,7 @@ async def test_create_shift_time_invalid(
 
 
 @pytest.mark.asyncio
-async def test_create_shift_max_employees_valid(
-    db_session: AsyncSession, manager: User
-) -> None:
+async def test_create_shift_max_employees_valid(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_shift_max_employees
 
     tg_user = make_tg_user(manager.telegram_id)
@@ -224,9 +207,8 @@ async def test_create_shift_max_employees_valid(
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_max_employees)
     await state.update_data(date="2026-12-01", time="09:00-17:00")
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_max_employees(message, state, data)
+    await process_shift_max_employees(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -236,9 +218,7 @@ async def test_create_shift_max_employees_valid(
 
 
 @pytest.mark.asyncio
-async def test_create_shift_max_employees_invalid(
-    db_session: AsyncSession, manager: User
-) -> None:
+async def test_create_shift_max_employees_invalid(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_shift_max_employees
 
     tg_user = make_tg_user(manager.telegram_id)
@@ -246,9 +226,8 @@ async def test_create_shift_max_employees_invalid(
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_max_employees)
     await state.update_data(date="2026-12-01", time="09:00-17:00")
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_max_employees(message, state, data)
+    await process_shift_max_employees(message, state)
 
     message.answer.assert_called_once()
     current_state = await state.get_state()
@@ -299,15 +278,14 @@ async def test_create_shift_skip_note(db_session: AsyncSession, manager: User) -
 
 # Create task FSM tests
 @pytest.mark.asyncio
-async def test_create_task_start(db_session: AsyncSession, manager: User) -> None:
+async def test_create_task_start(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import cmd_create_task
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user)
     state = await make_fsm_context()
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await cmd_create_task(message, state, data)
+    await cmd_create_task(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -317,19 +295,15 @@ async def test_create_task_start(db_session: AsyncSession, manager: User) -> Non
 
 
 @pytest.mark.asyncio
-async def test_create_task_title(
-    db_session: AsyncSession,
-    manager: User,
-) -> None:
+async def test_create_task_title(manager: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_task_title
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user, text="Clean the kitchen")
     state = await make_fsm_context()
     await state.set_state(CreateTaskStates.waiting_for_title)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_task_title(message, state, data)
+    await process_task_title(message, state)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -340,8 +314,7 @@ async def test_create_task_title(
 
 @pytest.mark.asyncio
 async def test_create_task_skip_description(
-    db_session: AsyncSession,
-    manager: User,
+    db_session: AsyncSession, manager: User, employee: User
 ) -> None:
     from shift_manager_bot.bot.handlers.manager import process_task_description
 
@@ -362,11 +335,7 @@ async def test_create_task_skip_description(
 
 
 @pytest.mark.asyncio
-async def test_create_task_assign_employee(
-    db_session: AsyncSession,
-    manager: User,
-    employee: User,
-) -> None:
+async def test_create_task_assign_employee(manager: User, employee: User) -> None:
     from shift_manager_bot.bot.handlers.manager import process_task_employee
 
     tg_user = make_tg_user(manager.telegram_id)
@@ -374,9 +343,8 @@ async def test_create_task_assign_employee(
     state = await make_fsm_context()
     await state.set_state(CreateTaskStates.waiting_for_employee)
     await state.update_data(title="Clean kitchen", description=None)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_task_employee(callback, state, data)
+    await process_task_employee(callback, state)
 
     callback.answer.assert_called_once()
     current_state = await state.get_state()
