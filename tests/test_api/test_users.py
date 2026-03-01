@@ -70,6 +70,16 @@ async def test_manager_can_list_team(
     async def override_get_db():
         yield db_session
 
+    employee = User(
+        telegram_id=random.randint(2500000000, 2599999999),
+        full_name="Team Employee",
+        role=UserRole.EMPLOYEE,
+        manager_id=mock_manager.id,
+    )
+    db_session.add(employee)
+    await db_session.commit()
+    await db_session.refresh(employee)
+
     app.dependency_overrides[get_current_user] = lambda: mock_manager
     app.dependency_overrides[get_db] = override_get_db
     response = await client.get("/api/users/team")
@@ -78,9 +88,7 @@ async def test_manager_can_list_team(
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-
-    # FIX: test fails
-    assert any(u["id"] == mock_manager.id for u in data)
+    assert any(u["id"] == employee.id for u in data)
 
 
 @pytest.mark.asyncio

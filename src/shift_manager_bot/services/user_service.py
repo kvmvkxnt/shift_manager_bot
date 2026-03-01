@@ -58,6 +58,11 @@ class UserService:
         await session.refresh(user)
         return user
 
-    async def get_all_active(self, session: AsyncSession) -> list[User]:
-        result = await session.execute(select(User).where(User.is_active))
+    async def get_all_active(
+        self, session: AsyncSession, manager_id: int | None = None
+    ) -> list[User]:
+        query = select(User).where(User.is_active, User.role == UserRole.EMPLOYEE)
+        if manager_id is not None:
+            query = query.where(User.manager_id == manager_id)
+        result = await session.execute(query)
         return list(result.scalars().all())

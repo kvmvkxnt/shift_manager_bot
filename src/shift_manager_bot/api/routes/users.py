@@ -31,4 +31,5 @@ async def get_team(
     current_user: User = Depends(require_role(UserRole.MANAGER, UserRole.OWNER)),
 ) -> list[User]:
     service = UserService()
-    return await service.get_all_active(session)
+    manager_id = current_user.id if current_user.role == UserRole.MANAGER else None
+    return await service.get_all_active(session, manager_id=manager_id)
