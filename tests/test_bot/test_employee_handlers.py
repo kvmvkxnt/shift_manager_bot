@@ -121,7 +121,7 @@ async def test_my_shifts_shows_shifts(
 
     await cmd_my_shifts(message, data)
 
-    shift, assignment = shift_with_assignment
+    shift, _ = shift_with_assignment
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
     assert str(shift.id) in response_text

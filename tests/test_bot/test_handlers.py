@@ -3,7 +3,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from aiogram.types import Chat, Message
+from aiogram.types import Message
 from aiogram.types import User as TgUser
 from sqlalchemy.ext.asyncio import AsyncSession
 

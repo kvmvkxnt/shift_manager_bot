@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.database.models.task import Task, TaskStatus
 from shift_manager_bot.database.models.user import User, UserRole
-from shift_manager_bot.services.shift_service import ShiftService
 from shift_manager_bot.services.task_service import TaskService
 
 
