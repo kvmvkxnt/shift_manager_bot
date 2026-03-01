@@ -78,6 +78,8 @@ async def test_manager_can_list_team(
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
+
+    # FIX: test fails
     assert any(u["id"] == mock_manager.id for u in data)
 
 
