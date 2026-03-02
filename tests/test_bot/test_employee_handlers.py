@@ -260,3 +260,91 @@ async def test_update_task_status_to_done(
     await db_session.refresh(employee_task)
     assert employee_task.status == TaskStatus.DONE
     callback.answer.assert_called_once()
+
+
+# tests for employee stats
+@pytest.fixture
+async def completed_shift(
+    db_session: AsyncSession,
+    employee: User,
+    manager: User,
+) -> ShiftAssignment:
+    shift = Shift(
+        manager_id=manager.id,
+        starts_at=datetime.now(timezone.utc) - timedelta(hours=10),
+        ends_at=datetime.now(timezone.utc) - timedelta(hours=2),
+        max_employees=3,
+    )
+    db_session.add(shift)
+    await db_session.commit()
+    await db_session.refresh(shift)
+
+    assignment = ShiftAssignment(
+        shift_id=shift.id,
+        employee_id=employee.id,
+        status=AssignmentStatus.COMPLETED,
+    )
+    db_session.add(assignment)
+    await db_session.commit()
+    await db_session.refresh(assignment)
+    return assignment
+
+
+@pytest.fixture
+async def done_task(
+    db_session: AsyncSession,
+    employee: User,
+    manager: User,
+) -> Task:
+    task = Task(
+        title="Done Task",
+        employee_id=employee.id,
+        manager_id=manager.id,
+        status=TaskStatus.DONE,
+    )
+    db_session.add(task)
+    await db_session.commit()
+    await db_session.refresh(task)
+    return task
+
+
+@pytest.mark.asyncio
+async def test_my_stats_shows_summary(
+    db_session: AsyncSession,
+    employee: User,
+    shift_with_assignment: tuple[Shift, ShiftAssignment],
+    completed_shift: ShiftAssignment,
+    done_task: Task,
+    employee_task: Task,
+) -> None:
+    from shift_manager_bot.bot.handlers.employee import cmd_my_stats
+
+    tg_user = make_tg_user(employee.telegram_id)
+    message = make_message(tg_user)
+    data: dict[str, Any] = {"session": db_session, "user": employee}
+
+    await cmd_my_stats(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "shift" in response_text.lower() or "task" in response_text.lower()
+
+
+@pytest.mark.asyncio
+async def test_my_stats_shows_correct_counts(
+    db_session: AsyncSession,
+    employee: User,
+    completed_shift: ShiftAssignment,
+    done_task: Task,
+) -> None:
+    from shift_manager_bot.bot.handlers.employee import cmd_my_stats
+
+    tg_user = make_tg_user(employee.telegram_id)
+    message = make_message(tg_user)
+    data: dict[str, Any] = {"session": db_session, "user": employee}
+
+    await cmd_my_stats(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "1" in response_text

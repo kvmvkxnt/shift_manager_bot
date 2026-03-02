@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.database.models.task import Task, TaskStatus
@@ -67,3 +67,13 @@ class TaskService:
     async def delete_task(self, session: AsyncSession, task: Task) -> None:
         await session.delete(task)
         await session.commit()
+
+    async def get_employee_tasks_count_by_status(
+        self, session: AsyncSession, employee_id: int, status: TaskStatus
+    ) -> int:
+        result = await session.execute(
+            select(func.count(Task.id)).where(
+                Task.employee_id == employee_id, Task.status == status
+            )
+        )
+        return result.scalar_one()

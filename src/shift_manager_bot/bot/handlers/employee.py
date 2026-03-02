@@ -139,3 +139,39 @@ async def on_task_action(
             return
 
         await callback.message.edit_text(format_task_text(task))
+
+
+@router.message(Command("my_stats"))
+async def cmd_my_stats(message: Message, data: dict[str, Any]) -> None:
+    session: AsyncSession = data["session"]
+    user: User = data["user"]
+
+    shift_service = ShiftService()
+    task_service = TaskService()
+
+    completed_shifts = await shift_service.get_employee_completed_shifts_count(
+        session, user.id
+    )
+    upcoming_shifts = await shift_service.get_employee_upcoming_shifts_count(
+        session, user.id
+    )
+    tasks_done = await task_service.get_employee_tasks_count_by_status(
+        session, user.id, TaskStatus.DONE
+    )
+    tasks_in_progress = await task_service.get_employee_tasks_count_by_status(
+        session, user.id, TaskStatus.IN_PROGRESS
+    )
+    tasks_todo = await task_service.get_employee_tasks_count_by_status(
+        session, user.id, TaskStatus.TODO
+    )
+
+    await message.answer(
+        f"Your stats¬¬"
+        f"Shifts:¬"
+        f"  Completed: {completed_shifts}¬"
+        f"  Upcoming: {upcoming_shifts}¬¬"
+        f"Tasks:¬"
+        f"  Done: {tasks_done}¬"
+        f"  In progress: {tasks_in_progress}¬"
+        f"  Todo: {tasks_todo}¬"
+    )

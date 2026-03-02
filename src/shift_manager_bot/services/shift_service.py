@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -118,3 +118,25 @@ class ShiftService:
             .options(selectinload(ShiftAssignment.shift))
         )
         return result.scalar_one_or_none()
+
+    async def get_employee_completed_shifts_count(
+        self, session: AsyncSession, employee_id: int
+    ) -> int:
+        result = await session.execute(
+            select(func.count(ShiftAssignment.id)).where(
+                ShiftAssignment.employee_id == employee_id,
+                ShiftAssignment.status == AssignmentStatus.COMPLETED,
+            )
+        )
+        return result.scalar_one()
+
+    async def get_employee_upcoming_shifts_count(
+        self, session: AsyncSession, employee_id: int
+    ) -> int:
+        result = await session.execute(
+            select(func.count(ShiftAssignment.id)).where(
+                ShiftAssignment.employee_id == employee_id,
+                ShiftAssignment.status == AssignmentStatus.CONFIRMED,
+            )
+        )
+        return result.scalar_one()
