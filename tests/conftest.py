@@ -1,3 +1,4 @@
+from typing import AsyncGenerator
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
@@ -22,7 +23,18 @@ async def setup_database():
 
 
 @pytest_asyncio.fixture
-async def db_session():
-    async with test_session_factory() as session:
-        yield session
-        await session.rollback()
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
+    async with engine.connect() as connection:
+        await connection.begin()
+        await connection.begin_nested()  # savepoint
+
+        session = AsyncSession(
+            bind=connection,
+            expire_on_commit=False,
+        )
+
+        try:
+            yield session
+        finally:
+            await session.close()
+            await connection.rollback()  # rolls back everything, including commits
