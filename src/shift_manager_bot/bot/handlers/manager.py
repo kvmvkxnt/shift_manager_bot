@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.bot.keyboards.manager import employees_keyboard
 from shift_manager_bot.bot.states import CreateShiftStates, CreateTaskStates
+from shift_manager_bot.database.models.task import TaskStatus
 from shift_manager_bot.database.models.user import User, UserRole
 from shift_manager_bot.services.invite_code_service import InviteCodeService
 from shift_manager_bot.services.shift_service import ShiftService
@@ -274,4 +275,37 @@ async def cmd_invite(message: Message, data: dict[str, Any]) -> None:
         f"Share this with the new employee. "
         "They can use it after sending /start to the bot.",
         parse_mode="HTML",
+    )
+
+
+@router.message(Command("team_stats"))
+async def cmd_team_stats(message: Message, data: dict[str, Any]) -> None:
+    session: AsyncSession = data["session"]
+    user: User = data["user"]
+
+    shift_service = ShiftService()
+    task_service = TaskService()
+    user_service = UserService()
+
+    team = await user_service.get_all_active(session, manager_id=user.id)
+    total_shifts = await shift_service.get_manager_shifts_count(session, user.id)
+    tasks_done = await task_service.get_manager_tasks_count_by_status(
+        session, user.id, TaskStatus.DONE
+    )
+    tasks_in_progress = await task_service.get_manager_tasks_count_by_status(
+        session, user.id, TaskStatus.IN_PROGRESS
+    )
+    tasks_todo = await task_service.get_manager_tasks_count_by_status(
+        session, user.id, TaskStatus.TODO
+    )
+
+    await message.answer(
+        f"Team Stats¬¬"
+        f"Team size: {len(team)}¬¬"
+        f"Shifts:¬"
+        f"  Total created: {total_shifts}¬¬"
+        f"Tasks:¬"
+        f"  Done: {tasks_done}¬"
+        f"  In progress: {tasks_in_progress}¬"
+        f"  Todo: {tasks_todo}¬"
     )

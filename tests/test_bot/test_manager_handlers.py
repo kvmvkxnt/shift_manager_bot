@@ -11,6 +11,8 @@ from aiogram.types import User as TgUser
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.bot.states import CreateShiftStates, CreateTaskStates
+from shift_manager_bot.database.models.shift import Shift
+from shift_manager_bot.database.models.task import Task, TaskStatus
 from shift_manager_bot.database.models.user import User, UserRole
 
 
@@ -423,3 +425,82 @@ async def test_manager_can_generate_employee_invite(
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
     assert "code" in response_text.lower() or "invite" in response_text.lower()
+
+
+# manager stats test
+@pytest.fixture
+async def manager_shift(
+    db_session: AsyncSession,
+    manager: User,
+    employee: User,
+) -> Shift:
+    shift = Shift(
+        manager_id=manager.id,
+        starts_at=datetime.now(timezone.utc) + timedelta(hours=1),
+        ends_at=datetime.now(timezone.utc) + timedelta(hours=9),
+        max_employees=3,
+    )
+    db_session.add(shift)
+    await db_session.commit()
+    await db_session.refresh(shift)
+    return shift
+
+
+@pytest.fixture
+async def manager_task(
+    db_session: AsyncSession,
+    manager: User,
+    employee: User,
+) -> Task:
+    task = Task(
+        title="Manager Task",
+        employee_id=employee.id,
+        manager_id=manager.id,
+        status=TaskStatus.TODO,
+    )
+    db_session.add(task)
+    await db_session.commit()
+    await db_session.refresh(task)
+    return task
+
+
+@pytest.mark.asyncio
+async def test_team_stats_shows_summary(
+    db_session: AsyncSession,
+    manager: User,
+    employee: User,
+    manager_shift: Shift,
+    manager_task: Task,
+) -> None:
+    from shift_manager_bot.bot.handlers.manager import cmd_team_stats
+
+    tg_user = make_tg_user(manager.telegram_id)
+    message = make_message(tg_user)
+    data: dict[str, Any] = {"session": db_session, "user": manager}
+
+    await cmd_team_stats(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "shift" in response_text.lower() or "task" in response_text.lower()
+
+
+@pytest.mark.asyncio
+async def test_team_stats_shows_correct_counts(
+    db_session: AsyncSession,
+    manager: User,
+    employee: User,
+    manager_shift: Shift,
+    manager_task: Task,
+) -> None:
+    from shift_manager_bot.bot.handlers.manager import cmd_team_stats
+
+    tg_user = make_tg_user(manager.telegram_id)
+    message = make_message(tg_user)
+    data: dict[str, Any] = {"session": db_session, "user": manager}
+
+    await cmd_team_stats(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "1" in response_text

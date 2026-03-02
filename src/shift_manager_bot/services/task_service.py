@@ -77,3 +77,13 @@ class TaskService:
             )
         )
         return result.scalar_one()
+
+    async def get_manager_tasks_count_by_status(
+        self, session: AsyncSession, manager_id: int, status: TaskStatus
+    ) -> int:
+        result = await session.execute(
+            select(func.count(Task.id)).where(
+                Task.manager_id == manager_id, Task.status == status
+            )
+        )
+        return result.scalar_one()

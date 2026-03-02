@@ -140,3 +140,11 @@ class ShiftService:
             )
         )
         return result.scalar_one()
+
+    async def get_manager_shifts_count(
+        self, session: AsyncSession, manager_id: int
+    ) -> int:
+        result = await session.execute(
+            select(func.count(Shift.id)).where(Shift.manager_id == manager_id)
+        )
+        return result.scalar_one()
