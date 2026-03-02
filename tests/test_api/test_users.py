@@ -65,22 +65,32 @@ async def test_get_me_unauthorized(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_manager_can_list_team(
-    client: AsyncClient, mock_manager: User, db_session: AsyncSession
+    client: AsyncClient,
+    db_session: AsyncSession,
 ) -> None:
     async def override_get_db():
         yield db_session
+
+    manager = User(
+        telegram_id=random.randint(2400000000, 2499999999),
+        full_name="Test Manager",
+        role=UserRole.MANAGER,
+    )
+    db_session.add(manager)
+    await db_session.commit()
+    await db_session.refresh(manager)
 
     employee = User(
         telegram_id=random.randint(2500000000, 2599999999),
         full_name="Team Employee",
         role=UserRole.EMPLOYEE,
-        manager_id=mock_manager.id,
+        manager_id=manager.id,
     )
     db_session.add(employee)
     await db_session.commit()
     await db_session.refresh(employee)
 
-    app.dependency_overrides[get_current_user] = lambda: mock_manager
+    app.dependency_overrides[get_current_user] = lambda: manager
     app.dependency_overrides[get_db] = override_get_db
     response = await client.get("/api/users/team")
     app.dependency_overrides.clear()
