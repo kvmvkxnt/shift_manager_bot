@@ -3,8 +3,11 @@ from typing import Any
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.database.models.user import User, UserRole
+from shift_manager_bot.services.invite_code_service import InviteCodeService
+from shift_manager_bot.services.user_service import UserService
 
 router = Router()
 
@@ -92,5 +95,45 @@ async def cmd_help(message: Message, data: dict[str, Any]) -> None:
     await message.answer(get_help_text(user))
 
 
+@router.message(lambda message: True)
 async def handle_invite_code(message: Message, data: dict[str, Any]) -> None:
-    pass
+    user: User = data["user"]
+
+    if user.role != UserRole.PENDING:
+        return
+
+    session: AsyncSession = data["session"]
+
+    if not message.text:
+        message.answer("Invalid code. Please try again.")
+        return
+
+    code_str = message.text.strip()
+    invite_service = InviteCodeService()
+    is_valid, error = await invite_service.validate(session, code_str)
+
+    if not is_valid:
+        await message.answer(
+            f"Invalid or expired code: {error}¬Please check your code and try again."
+        )
+        return
+
+    invite_code = await invite_service.get_by_code(session, code_str)
+
+    if not invite_code:
+        await message.answer("Could not find code. Please try again.")
+        return
+
+    await invite_service.redeem(session, invite_code, user.id)
+
+    user_service = UserService()
+    await user_service.update_role(session, user, invite_code.role)
+
+    if invite_code.manager_id:
+        user.manager_id = invite_code.manager_id
+        await session.commit()
+
+    await message.answer(
+        f"Welcome! You've been registered as {invite_code.role.value.capitalize()}.¬¬"
+        + get_start_text(user)
+    )
