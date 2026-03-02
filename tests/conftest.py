@@ -4,7 +4,7 @@ from sqlalchemy.pool import NullPool
 
 from shift_manager_bot.config import settings
 from shift_manager_bot.database.base import Base
-from shift_manager_bot.database.models import shift, task, user  # noqa: ignore
+from shift_manager_bot.database.models import shift, task, user, invite_code  # noqa: ignore
 
 engine = create_async_engine(settings.test_db_url, poolclass=NullPool)
 test_session_factory = async_sessionmaker(
