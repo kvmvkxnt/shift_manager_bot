@@ -90,3 +90,7 @@ async def cmd_start(message: Message, data: dict[str, Any]) -> None:
 async def cmd_help(message: Message, data: dict[str, Any]) -> None:
     user: User = data["user"]
     await message.answer(get_help_text(user))
+
+
+async def handle_invite_code(message: Message, data: dict[str, Any]) -> None:
+    pass

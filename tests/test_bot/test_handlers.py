@@ -1,4 +1,5 @@
 import random
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
@@ -157,3 +158,104 @@ async def test_help_manager(db_session: AsyncSession, manager_user: User) -> Non
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
     assert "create" in response_text.lower() or "team" in response_text.lower()
+
+
+# Invite code handling tests
+@pytest.mark.asyncio
+async def test_pending_user_enters_valid_code(
+    db_session: AsyncSession,
+    pending_user: User,
+) -> None:
+    from shift_manager_bot.bot.handlers.common import handle_invite_code
+    from shift_manager_bot.services.invite_code_service import InviteCodeService
+
+    owner = User(
+        telegram_id=random.randint(4500000000, 4599999999),
+        full_name="Owner",
+        role=UserRole.OWNER,
+    )
+    db_session.add(owner)
+    await db_session.commit()
+    await db_session.refresh(owner)
+
+    invite_service = InviteCodeService()
+    code = await invite_service.generate(
+        db_session,
+        role=UserRole.EMPLOYEE,
+        created_by=owner.id,
+    )
+
+    tg_user = make_tg_user(user_id=pending_user.telegram_id)
+    message = make_message(tg_user, text=code.code)
+    data: dict[str, Any] = {"session": db_session, "user": pending_user}
+
+    await handle_invite_code(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "welcome" in response_text.lower() or "success" in response_text.lower()
+
+    await db_session.refresh(pending_user)
+    assert pending_user.role == UserRole.EMPLOYEE
+
+
+@pytest.mark.asyncio
+async def test_pending_user_enters_invalid_code(
+    db_session: AsyncSession,
+    pending_user: User,
+) -> None:
+    from shift_manager_bot.bot.handlers.common import handle_invite_code
+
+    tg_user = make_tg_user(user_id=pending_user.telegram_id)
+    message = make_message(tg_user, text="INVALID123")
+    data: dict[str, Any] = {"session": db_session, "user": pending_user}
+
+    await handle_invite_code(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "invalid" in response_text.lower() or "wrong" in response_text.lower()
+
+    await db_session.refresh(pending_user)
+    assert pending_user.role == UserRole.PENDING
+
+
+@pytest.mark.asyncio
+async def test_pending_user_enters_expired_code(
+    db_session: AsyncSession,
+    pending_user: User,
+) -> None:
+    from datetime import timedelta
+
+    from shift_manager_bot.bot.handlers.common import handle_invite_code
+    from shift_manager_bot.services.invite_code_service import InviteCodeService
+
+    owner = User(
+        telegram_id=random.randint(4600000000, 4699999999),
+        full_name="Owner",
+        role=UserRole.OWNER,
+    )
+    db_session.add(owner)
+    await db_session.commit()
+    await db_session.refresh(owner)
+
+    invite_service = InviteCodeService()
+    code = await invite_service.generate(
+        db_session,
+        role=UserRole.EMPLOYEE,
+        created_by=owner.id,
+        expires_at=datetime.now(timezone.utc) - timedelta(days=1),
+    )
+
+    tg_user = make_tg_user(user_id=pending_user.telegram_id)
+    message = make_message(tg_user, text=code.code)
+    data: dict[str, Any] = {"session": db_session, "user": pending_user}
+
+    await handle_invite_code(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "expired" in response_text.lower() or "invalid" in response_text.lower()
+
+    await db_session.refresh(pending_user)
+    assert pending_user.role == UserRole.PENDING
