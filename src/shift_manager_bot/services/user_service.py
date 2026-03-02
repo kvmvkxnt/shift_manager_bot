@@ -66,3 +66,28 @@ class UserService:
             query = query.where(User.manager_id == manager_id)
         result = await session.execute(query)
         return list(result.scalars().all())
+
+    async def get_all_managers(self, session: AsyncSession) -> list[User]:
+        result = await session.execute(
+            select(User).where(User.is_active, User.role == UserRole.MANAGER)
+        )
+        return list(result.scalars().all())
+
+    async def get_all_teams(self, session: AsyncSession) -> dict[User, list[User]]:
+        manager_result = await session.execute(
+            select(User).where(User.is_active, User.role == UserRole.MANAGER)
+        )
+        managers = list(manager_result.scalars().all())
+
+        teams: dict[User, list[User]] = {}
+        for manager in managers:
+            employees_result = await session.execute(
+                select(User).where(
+                    User.is_active,
+                    User.role == UserRole.EMPLOYEE,
+                    User.manager_id == manager.id,
+                )
+            )
+            teams[manager] = list(employees_result.scalars().all())
+
+        return teams
