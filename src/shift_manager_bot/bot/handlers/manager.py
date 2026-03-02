@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.bot.keyboards.manager import employees_keyboard
 from shift_manager_bot.bot.states import CreateShiftStates, CreateTaskStates
-from shift_manager_bot.database.models.user import User
+from shift_manager_bot.database.models.user import User, UserRole
+from shift_manager_bot.services.invite_code_service import InviteCodeService
 from shift_manager_bot.services.shift_service import ShiftService
 from shift_manager_bot.services.task_service import TaskService
 from shift_manager_bot.services.user_service import UserService
@@ -37,7 +38,7 @@ async def cmd_my_team(message: Message, data: dict[str, Any]) -> None:
 
 
 @router.message(Command("create_shift"))
-async def cmd_create_shift(message: None, state: FSMContext) -> None:
+async def cmd_create_shift(message: Message, state: FSMContext) -> None:
     await state.set_state(CreateShiftStates.waiting_for_date)
     await message.answer(
         "Let's create a new shift!¬¬Please enter the date (format: YYYY-MM-DD):"
@@ -254,4 +255,23 @@ async def process_task_deadline(
         f"Title: {task.title}¬"
         f"Description: {task.description or 'None'}¬"
         f"Deadline: {deadline.strftime('%Y-%m-%d %H:%M') if deadline else 'None'}"
+    )
+
+
+@router.message(Command("invite"))
+async def cmd_invite(message: Message, data: dict[str, Any]) -> None:
+    session: AsyncSession = data["session"]
+    user: User = data["user"]
+    service = InviteCodeService()
+
+    code = await service.generate(
+        session, role=UserRole.EMPLOYEE, created_by=user.id, manager_id=user.id
+    )
+
+    await message.answer(
+        f"Employee invite code generated!¬¬"
+        f"Code: <code>{code.code}</code>¬¬"
+        f"Share this with the new employee. "
+        "They can use it after sending /start to the bot.",
+        parse_mode="HTML",
     )

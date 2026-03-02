@@ -405,3 +405,21 @@ async def test_create_task_with_deadline(
     assert "created" in response_text.lower() or "success" in response_text.lower()
     current_state = await state.get_state()
     assert current_state is None
+
+
+@pytest.mark.asyncio
+async def test_manager_can_generate_employee_invite(
+    db_session: AsyncSession,
+    manager: User,
+) -> None:
+    from shift_manager_bot.bot.handlers.manager import cmd_invite
+
+    tg_user = make_tg_user(manager.telegram_id)
+    message = make_message(tg_user)
+    data: dict[str, Any] = {"session": db_session, "user": manager}
+
+    await cmd_invite(message, data)
+
+    message.answer.assert_called_once()
+    response_text: str = message.answer.call_args[0][0]
+    assert "code" in response_text.lower() or "invite" in response_text.lower()
