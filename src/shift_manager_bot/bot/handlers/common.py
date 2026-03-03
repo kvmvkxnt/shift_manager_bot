@@ -1,5 +1,3 @@
-from typing import Any
-
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -15,49 +13,49 @@ PENDING_TEXT = "Welcome! To get started, please enter your invite code:"
 
 EMPLOYEE_TEXT = (
     "Welcome back, {name}!\n\n"
-    "Here's what you can do:¬"
-    "/my_shifts - View your upcoming shifts¬"
-    "/my_tasks - View your tasks¬"
-    "/my_stats - View your stats¬"
+    "Here's what you can do:\n"
+    "/my_shifts - View your upcoming shifts\n"
+    "/my_tasks - View your tasks\n"
+    "/my_stats - View your stats\n"
 )
 
 MANAGER_TEXT = (
-    "Welcome back, {name}!¬¬"
-    "Here's what you can do:¬"
-    "/create_shift - Create a new shift¬"
-    "/create_task - Create a new task¬"
-    "/my_team - View your team¬"
-    "/team_stats - View team stats¬"
+    "Welcome back, {name}!\n\n"
+    "Here's what you can do:\n"
+    "/create_shift - Create a new shift\n"
+    "/create_task - Create a new task\n"
+    "/my_team - View your team\n"
+    "/team_stats - View team stats\n"
 )
 
 OWNER_TEXT = (
-    "Welcome back, {name}!¬¬"
-    "Here's what you can do:¬"
-    "/create_shift - Create a new shift¬"
-    "/create_task - Create a new task¬"
-    "/my_team - View your team¬"
-    "/team_stats - View team stats¬"
-    "/admin - Open admin panel¬"
-    "/invite - Generate invite codes¬"
+    "Welcome back, {name}!\n\n"
+    "Here's what you can do:\n"
+    "/create_shift - Create a new shift\n"
+    "/create_task - Create a new task\n"
+    "/my_team - View your team\n"
+    "/team_stats - View team stats\n"
+    "/admin - Open admin panel\n"
+    "/invite - Generate invite codes\n"
 )
 
 HELP_PENDING_TEXT = (
-    "To get started, enter your invite code.¬Contact your manager to get one."
+    "To get started, enter your invite code.\nContact your manager to get one."
 )
 
 HELP_EMPLOYEE_TEXT = (
-    "Available commands:¬"
-    "/my_shifts - View and manage your shifts¬"
-    "/my_tasks - View and update your tasks¬"
-    "/my_stats - View your performance stats¬"
+    "Available commands:\n"
+    "/my_shifts - View and manage your shifts\n"
+    "/my_tasks - View and update your tasks\n"
+    "/my_stats - View your performance stats\n"
 )
 
 HELP_MANAGER_TEXT = (
-    "Available commands:¬"
-    "/create_shift - Create a new shift¬"
-    "/create_task - Assign a task to an employee¬"
-    "/my_team - View your team members¬"
-    "/team_stats - View your performance¬"
+    "Available commands:\n"
+    "/create_shift - Create a new shift\n"
+    "/create_task - Assign a task to an employee\n"
+    "/my_team - View your team members\n"
+    "/team_stats - View your performance\n"
 )
 
 
@@ -110,7 +108,7 @@ async def handle_invite_code(
 
     if not is_valid:
         await message.answer(
-            f"Invalid or expired code: {error}¬Please check your code and try again."
+            f"Invalid or expired code: {error}\nPlease check your code and try again."
         )
         return
 
@@ -130,6 +128,6 @@ async def handle_invite_code(
         await session.commit()
 
     await message.answer(
-        f"Welcome! You've been registered as {invite_code.role.value.capitalize()}.¬¬"
+        f"Welcome! You've been registered as {invite_code.role.value.capitalize()}.\n\n"
         + get_start_text(user)
     )

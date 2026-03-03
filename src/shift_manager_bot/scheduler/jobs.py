@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 from aiogram import Bot
 from sqlalchemy import select
@@ -39,8 +38,8 @@ async def send_shift_reminders(bot: Bot, session: AsyncSession) -> None:
 
         await bot.send_message(
             employee.telegram_id,
-            f"Shift reminder!¬¬"
-            f"Your shift #{shift.id} starts soon.¬"
-            f"Date: {date_str}¬"
-            f"Time: {time_str}¬" + (f"Note: {shift.note}" if shift.note else ""),
+            f"Shift reminder!\n\n"
+            f"Your shift #{shift.id} starts soon.\n"
+            f"Date: {date_str}\n"
+            f"Time: {time_str}\n" + (f"Note: {shift.note}" if shift.note else ""),
         )

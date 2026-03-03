@@ -1,14 +1,12 @@
-from typing import Any
-
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
-
 from sqlalchemy.ext.asyncio import AsyncSession
-from shift_manager_bot.services.user_service import UserService
-from shift_manager_bot.services.invite_code_service import InviteCodeService
-from shift_manager_bot.database.models.user import User, UserRole
+
 from shift_manager_bot.bot.keyboards.owner import managers_keyboard
+from shift_manager_bot.database.models.user import User, UserRole
+from shift_manager_bot.services.invite_code_service import InviteCodeService
+from shift_manager_bot.services.user_service import UserService
 
 router = Router()
 
@@ -24,14 +22,14 @@ async def cmd_admin(message: Message, session: AsyncSession) -> None:
         total_employees += len(employees)
 
     await message.answer(
-        "Admin Panel¬¬"
-        f"Managers: {len(managers)}¬"
-        f"Employees: {total_employees}¬¬"
-        "Available commands:¬"
-        "/all_teams - View all teams¬"
-        "/org_stats - Organizational stats¬"
-        "/invite_manager - Generate manager invite¬"
-        "/invite_employee - Generate employee invite¬"
+        "Admin Panel\n\n"
+        f"Managers: {len(managers)}\n"
+        f"Employees: {total_employees}\n\n"
+        "Available commands:\n"
+        "/all_teams - View all teams\n"
+        "/org_stats - Organizational stats\n"
+        "/invite_manager - Generate manager invite\n"
+        "/invite_employee - Generate employee invite\n"
     )
 
 
@@ -44,8 +42,8 @@ async def cmd_invite_manager(
     code = await service.generate(session, role=UserRole.MANAGER, created_by=user.id)
 
     await message.answer(
-        f"Manager invite code generated!¬¬"
-        f"Code: <code>{code.code}</code>¬¬"
+        f"Manager invite code generated!\n\n"
+        f"Code: <code>{code.code}</code>\n\n"
         "Share this with the new manager. "
         "They can use it after sending /start to the bot.",
         parse_mode="HTML",
@@ -87,8 +85,8 @@ async def on_invite_employee_manager(
     if not callback.message:
         return
     await callback.message.answer(
-        f"Employee invite code generated!¬¬"
-        f"Code: <code>{code.code}</code>¬¬"
+        f"Employee invite code generated!\n\n"
+        f"Code: <code>{code.code}</code>\n\n"
         "Share this with the new employee. "
         "They can use it after sending /start to the bot.",
         parse_mode="HTML",
@@ -114,7 +112,7 @@ async def cmd_all_teams(message: Message, session: AsyncSession) -> None:
         else:
             lines.append("  └ (no employees)")
 
-    await message.answer("All Teams¬¬" + "¬".join(lines))
+    await message.answer("All Teams\n\n" + "\n".join(lines))
 
 
 @router.message(Command("org_stats"))
@@ -128,7 +126,7 @@ async def cmd_org_stats(message: Message, session: AsyncSession) -> None:
         total_employees += len(employees)
 
     await message.answer(
-        "Organization Stats¬¬"
-        f"Total managers: {len(managers)}¬"
-        f"Total employees: {total_employees}¬"
+        "Organization Stats\n\n"
+        f"Total managers: {len(managers)}\n"
+        f"Total employees: {total_employees}\n"
     )

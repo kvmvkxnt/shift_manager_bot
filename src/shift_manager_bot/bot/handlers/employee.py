@@ -1,5 +1,3 @@
-from typing import Any
-
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
@@ -22,22 +20,22 @@ router = Router()
 
 def format_shift_text(shift: Shift, assignment: ShiftAssignment) -> str:
     return (
-        f"Shift #{shift.id}¬"
+        f"Shift #{shift.id}\n"
         f"Time: {shift.starts_at.strftime('%Y-%m-%d %H:%M')} → "
-        f"{shift.ends_at.strftime('%H:%M')}¬"
-        f"Status: {assignment.status.value.capitalize()}¬"
+        f"{shift.ends_at.strftime('%H:%M')}\n"
+        f"Status: {assignment.status.value.capitalize()}\n"
         f"{f'📝 {shift.note}' if shift.note else ''}"
     ).strip()
 
 
 def format_task_text(task: Task) -> str:
     deadline_str = (
-        f"¬Deadline: {task.deadline.strftime('%Y-%m-%d %H:%M')}"
+        f"\nDeadline: {task.deadline.strftime('%Y-%m-%d %H:%M')}"
         if task.deadline
         else ""
     )
     return (
-        f"Task #{task.id}: {task.title}¬"
+        f"Task #{task.id}: {task.title}\n"
         f"Status: {task.status.value.replace('_', ' ').capitalize()}"
         f"{deadline_str}"
     ).strip()
@@ -158,12 +156,12 @@ async def cmd_my_stats(message: Message, user: User, session: AsyncSession) -> N
     )
 
     await message.answer(
-        f"Your stats¬¬"
-        f"Shifts:¬"
-        f"  Completed: {completed_shifts}¬"
-        f"  Upcoming: {upcoming_shifts}¬¬"
-        f"Tasks:¬"
-        f"  Done: {tasks_done}¬"
-        f"  In progress: {tasks_in_progress}¬"
-        f"  Todo: {tasks_todo}¬"
+        f"Your stats\n\n"
+        f"Shifts:\n"
+        f"  Completed: {completed_shifts}\n"
+        f"  Upcoming: {upcoming_shifts}\n\n"
+        f"Tasks:\n"
+        f"  Done: {tasks_done}\n"
+        f"  In progress: {tasks_in_progress}\n"
+        f"  Todo: {tasks_todo}\n"
     )

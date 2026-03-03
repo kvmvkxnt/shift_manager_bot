@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from typing import Any
 
 from aiogram import Router
 from aiogram.filters import Command
@@ -29,7 +28,7 @@ async def cmd_my_team(message: Message, user: User, session: AsyncSession) -> No
         await message.answer("You have no employees in your team yet.")
         return
 
-    text = "Your team:¬¬" + "¬".join(
+    text = "Your team:\n\n" + "\n".join(
         f"- {e.full_name}" + (f" (@{e.username})" if e.username else "") for e in team
     )
 
@@ -40,7 +39,7 @@ async def cmd_my_team(message: Message, user: User, session: AsyncSession) -> No
 async def cmd_create_shift(message: Message, state: FSMContext) -> None:
     await state.set_state(CreateShiftStates.waiting_for_date)
     await message.answer(
-        "Let's create a new shift!¬¬Please enter the date (format: YYYY-MM-DD):"
+        "Let's create a new shift!\n\nPlease enter the date (format: YYYY-MM-DD):"
     )
 
 
@@ -63,7 +62,7 @@ async def process_shift_date(message: Message, state: FSMContext) -> None:
     await state.update_data(date=message.text.strip())
     await state.set_state(CreateShiftStates.waiting_for_time)
     await message.answer(
-        "Great! Now enter the shift time range¬(format: HH:MM-HH:MM, e.g. 09:00-17:00):"
+        "Great! Now enter the shift time range\n(format: HH:MM-HH:MM, e.g. 09:00-17:00):"
     )
 
 
@@ -146,10 +145,10 @@ async def process_shift_note(
 
     await state.clear()
     await message.answer(
-        f"Shift successfully created!¬¬"
-        f"Date: {date_str}¬"
-        f"Time: {time_str}¬"
-        f"Max employees: {fsm_data['max_employees']}¬"
+        f"Shift successfully created!\n\n"
+        f"Date: {date_str}\n"
+        f"Time: {time_str}\n"
+        f"Max employees: {fsm_data['max_employees']}\n"
         f"Note: {note or 'None'}"
     )
 
@@ -158,7 +157,7 @@ async def process_shift_note(
 @router.message(Command("create_task"))
 async def cmd_create_task(message: Message, state: FSMContext) -> None:
     await state.set_state(CreateTaskStates.waiting_for_title)
-    await message.answer("Let's create a new task!¬¬Please enter the task title:")
+    await message.answer("Let's create a new task!\n\nPlease enter the task title:")
 
 
 @router.message(CreateTaskStates.waiting_for_title)
@@ -244,9 +243,9 @@ async def process_task_deadline(
 
     await state.clear()
     await message.answer(
-        f"Task successfully created!¬¬"
-        f"Title: {task.title}¬"
-        f"Description: {task.description or 'None'}¬"
+        f"Task successfully created!\n\n"
+        f"Title: {task.title}\n"
+        f"Description: {task.description or 'None'}\n"
         f"Deadline: {deadline.strftime('%Y-%m-%d %H:%M') if deadline else 'None'}"
     )
 
@@ -260,8 +259,8 @@ async def cmd_invite(message: Message, user: User, session: AsyncSession) -> Non
     )
 
     await message.answer(
-        f"Employee invite code generated!¬¬"
-        f"Code: <code>{code.code}</code>¬¬"
+        f"Employee invite code generated!\n\n"
+        f"Code: <code>{code.code}</code>\n\n"
         f"Share this with the new employee. "
         "They can use it after sending /start to the bot.",
         parse_mode="HTML",
@@ -287,12 +286,12 @@ async def cmd_team_stats(message: Message, user: User, session: AsyncSession) ->
     )
 
     await message.answer(
-        f"Team Stats¬¬"
-        f"Team size: {len(team)}¬¬"
-        f"Shifts:¬"
-        f"  Total created: {total_shifts}¬¬"
-        f"Tasks:¬"
-        f"  Done: {tasks_done}¬"
-        f"  In progress: {tasks_in_progress}¬"
-        f"  Todo: {tasks_todo}¬"
+        f"Team Stats\n\n"
+        f"Team size: {len(team)}\n\n"
+        f"Shifts:\n"
+        f"  Total created: {total_shifts}\n\n"
+        f"Tasks:\n"
+        f"  Done: {tasks_done}\n"
+        f"  In progress: {tasks_in_progress}\n"
+        f"  Todo: {tasks_todo}\n"
     )
