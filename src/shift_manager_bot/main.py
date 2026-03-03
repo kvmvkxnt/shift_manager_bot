@@ -4,7 +4,6 @@ import logging
 import uvicorn
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.api.router import app
 from shift_manager_bot.bot.handlers import common, employee, manager, owner
@@ -34,10 +33,7 @@ async def main() -> None:
     bot = Bot(token=settings.bot_token)
     dp = Dispatcher(storage=MemoryStorage())
 
-    async def session_factory() -> AsyncSession:
-        return async_session_factory()
-
-    dp.update.middleware(DbSessionMiddleware(session_factory=session_factory))
+    dp.update.middleware(DbSessionMiddleware(session_factory=async_session_factory))
     dp.update.middleware(AuthMiddleware())
 
     dp.include_router(common.router)
