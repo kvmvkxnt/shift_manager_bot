@@ -31,7 +31,7 @@ class Task(Base):
         DateTime(timezone=True), nullable=True
     )
     status: Mapped[TaskStatus] = mapped_column(
-        SqlEnum(TaskStatus, name="taskstatus", create_type=True, values_callable=lambda x: [e.value for e in x]),
+        SqlEnum(TaskStatus, name="taskstatus", create_type=True),
         default=TaskStatus.TODO,
         nullable=False,
     )

@@ -49,7 +49,7 @@ class ShiftAssignment(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     status: Mapped[AssignmentStatus] = mapped_column(
-        SqlEnum(AssignmentStatus, name="assignmentstatus", create_type=True, values_callable=lambda x: [e.value for e in x]),
+        SqlEnum(AssignmentStatus, name="assignmentstatus", create_type=True),
         default=AssignmentStatus.PENDING,
         nullable=False,
     )

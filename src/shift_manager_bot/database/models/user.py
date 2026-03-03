@@ -23,8 +23,7 @@ class User(Base):
     username: Mapped[str | None] = mapped_column(String(64), nullable=True)
     full_name: Mapped[str] = mapped_column(String(128), nullable=False)
     role: Mapped[UserRole] = mapped_column(
-        SqlEnum(UserRole, name="userrole", create_type=True, values_callable=lambda x: [e.value for e in x]),
-        nullable=False,
+        SqlEnum(UserRole, name="userrole", create_type=True), nullable=False
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean, default=True, server_default="true"
