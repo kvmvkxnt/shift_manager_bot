@@ -27,17 +27,17 @@ MANAGER_TEXT = (
     "/create_task - Create a new task\n"
     "/my_team - View your team\n"
     "/team_stats - View team stats\n"
+    "/invite - Generate employee invite code\n"
 )
 
 OWNER_TEXT = (
     "Welcome back, {name}!\n\n"
     "Here's what you can do:\n"
-    "/create_shift - Create a new shift\n"
-    "/create_task - Create a new task\n"
-    "/my_team - View your team\n"
-    "/team_stats - View team stats\n"
     "/admin - Open admin panel\n"
-    "/invite - Generate invite codes\n"
+    "/invite_manager - Generate manager invite code\n"
+    "/invite_employee - Generate employee invite code\n"
+    "/all_teams - View all teams\n"
+    "/org_stats - View organization stats\n"
 )
 
 HELP_PENDING_TEXT = (
@@ -56,7 +56,17 @@ HELP_MANAGER_TEXT = (
     "/create_shift - Create a new shift\n"
     "/create_task - Assign a task to an employee\n"
     "/my_team - View your team members\n"
-    "/team_stats - View your performance\n"
+    "/team_stats - View team stats\n"
+    "/invite - Generate employee invite code\n"
+)
+
+HELP_OWNER_TEXT = (
+    "Available commands:\n"
+    "/admin - Open admin panel\n"
+    "/invite_manager - Generate manager invite code\n"
+    "/invite_employee - Generate employee invite code\n"
+    "/all_teams - View all teams\n"
+    "/org_stats - View organization stats\n"
 )
 
 
@@ -77,8 +87,10 @@ def get_help_text(user: User) -> str:
         return HELP_PENDING_TEXT
     if user.role == UserRole.EMPLOYEE:
         return HELP_EMPLOYEE_TEXT
-    if user.role in (UserRole.MANAGER, UserRole.OWNER):
+    if user.role == UserRole.MANAGER:
         return HELP_MANAGER_TEXT
+    if user.role == UserRole.OWNER:
+        return HELP_OWNER_TEXT
     return HELP_PENDING_TEXT
 
 
