@@ -1,7 +1,8 @@
 from typing import Any, Awaitable, Callable
 
 from aiogram import BaseMiddleware
-from aiogram.types import Message, TelegramObject
+from aiogram.types import TelegramObject
+from aiogram.types import User as TelegramUser
 
 from shift_manager_bot.services.user_service import UserService
 
@@ -13,17 +14,14 @@ class AuthMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> Any:
-        if not isinstance(event, Message):
-            return await handler(event, data)
-
-        if event.from_user is None:
+        tg_user: TelegramUser | None = data.get("event_from_user")
+        if tg_user is None:
             return await handler(event, data)
 
         session = data.get("session")
         if session is None:
             return await handler(event, data)
 
-        tg_user = event.from_user
         service = UserService()
         user, _ = await service.get_or_create(
             session,

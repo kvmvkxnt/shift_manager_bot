@@ -2,13 +2,13 @@ from typing import Any, Awaitable, Callable
 
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 
 class DbSessionMiddleware(BaseMiddleware):
     def __init__(
         self,
-        session_factory: Callable[[], Awaitable[AsyncSession]],
+        session_factory: async_sessionmaker[AsyncSession],
     ) -> None:
         self.session_factory = session_factory
 
@@ -18,6 +18,6 @@ class DbSessionMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> Any:
-        session = await self.session_factory()
-        data["session"] = session
-        return await handler(event, data)
+        async with self.session_factory() as session:
+            data["session"] = session
+            return await handler(event, data)
