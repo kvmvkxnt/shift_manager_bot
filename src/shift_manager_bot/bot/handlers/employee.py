@@ -44,9 +44,7 @@ def format_task_text(task: Task) -> str:
 
 
 @router.message(Command("my_shifts"))
-async def cmd_my_shifts(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
+async def cmd_my_shifts(message: Message, user: User, session: AsyncSession) -> None:
     service = ShiftService()
 
     assignments = await service.get_employee_assignments(session, user.id)
@@ -65,9 +63,8 @@ async def cmd_my_shifts(message: Message, data: dict[str, Any]) -> None:
 
 @router.callback_query(ShiftCallbackData.filter())
 async def on_shift_action(
-    callback: CallbackQuery, callback_data: ShiftCallbackData, data: dict[str, Any]
+    callback: CallbackQuery, callback_data: ShiftCallbackData, session: AsyncSession
 ) -> None:
-    session: AsyncSession = data["session"]
     service = ShiftService()
 
     assignment = await service.get_assignment_by_id(
@@ -98,9 +95,7 @@ async def on_shift_action(
 
 
 @router.message(Command("my_tasks"))
-async def cmd_my_tasks(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
+async def cmd_my_tasks(message: Message, user: User, session: AsyncSession) -> None:
     service = TaskService()
 
     tasks = await service.get_employee_tasks(session, user.id)
@@ -117,9 +112,8 @@ async def cmd_my_tasks(message: Message, data: dict[str, Any]) -> None:
 
 @router.callback_query(TaskCallbackData.filter())
 async def on_task_action(
-    callback: CallbackQuery, callback_data: TaskCallbackData, data: dict[str, Any]
+    callback: CallbackQuery, callback_data: TaskCallbackData, session: AsyncSession
 ) -> None:
-    session: AsyncSession = data["session"]
     service = TaskService()
 
     task = await service.get_by_id(session, callback_data.task_id)
@@ -142,9 +136,7 @@ async def on_task_action(
 
 
 @router.message(Command("my_stats"))
-async def cmd_my_stats(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
+async def cmd_my_stats(message: Message, user: User, session: AsyncSession) -> None:
 
     shift_service = ShiftService()
     task_service = TaskService()

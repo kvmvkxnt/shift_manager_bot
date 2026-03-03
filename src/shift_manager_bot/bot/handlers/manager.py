@@ -20,9 +20,7 @@ router = Router()
 
 
 @router.message(Command("my_team"))
-async def cmd_my_team(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
+async def cmd_my_team(message: Message, user: User, session: AsyncSession) -> None:
     service = UserService()
 
     team = await service.get_all_active(session, manager_id=user.id)
@@ -115,10 +113,8 @@ async def process_shift_max_employees(message: Message, state: FSMContext) -> No
 
 @router.message(CreateShiftStates.waiting_for_note)
 async def process_shift_note(
-    message: Message, state: FSMContext, data: dict[str, Any]
+    message: Message, state: FSMContext, user: User, session: AsyncSession
 ) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
     fsm_data = await state.get_data()
 
     note: str | None
@@ -178,7 +174,7 @@ async def process_task_title(message: Message, state: FSMContext) -> None:
 
 @router.message(CreateTaskStates.waiting_for_description)
 async def process_task_description(
-    message: Message, state: FSMContext, data: dict[str, Any]
+    message: Message, state: FSMContext, user: User, session: AsyncSession
 ) -> None:
     if not message.text:
         await message.answer("Enter a description or /skip to skip:")
@@ -188,8 +184,6 @@ async def process_task_description(
     await state.update_data(description=description)
     await state.set_state(CreateTaskStates.waiting_for_employee)
 
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
     service = UserService()
     team = await service.get_all_active(session, manager_id=user.id)
 
@@ -219,10 +213,8 @@ async def process_task_employee(callback: CallbackQuery, state: FSMContext) -> N
 
 @router.message(CreateTaskStates.waiting_for_deadline)
 async def process_task_deadline(
-    message: Message, state: FSMContext, data: dict[str, Any]
+    message: Message, state: FSMContext, user: User, session: AsyncSession
 ) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
     fsm_data = await state.get_data()
 
     deadline = None
@@ -260,9 +252,7 @@ async def process_task_deadline(
 
 
 @router.message(Command("invite"))
-async def cmd_invite(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
+async def cmd_invite(message: Message, user: User, session: AsyncSession) -> None:
     service = InviteCodeService()
 
     code = await service.generate(
@@ -279,10 +269,7 @@ async def cmd_invite(message: Message, data: dict[str, Any]) -> None:
 
 
 @router.message(Command("team_stats"))
-async def cmd_team_stats(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
-
+async def cmd_team_stats(message: Message, user: User, session: AsyncSession) -> None:
     shift_service = ShiftService()
     task_service = TaskService()
     user_service = UserService()

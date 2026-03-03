@@ -84,28 +84,24 @@ def get_help_text(user: User) -> str:
 
 
 @router.message(Command("start"))
-async def cmd_start(message: Message, data: dict[str, Any]) -> None:
-    user: User = data["user"]
+async def cmd_start(message: Message, user: User) -> None:
     await message.answer(get_start_text(user))
 
 
 @router.message(Command("help"))
-async def cmd_help(message: Message, data: dict[str, Any]) -> None:
-    user: User = data["user"]
+async def cmd_help(message: Message, user: User) -> None:
     await message.answer(get_help_text(user))
 
 
 @router.message(lambda message: True)
-async def handle_invite_code(message: Message, data: dict[str, Any]) -> None:
-    user: User = data["user"]
-
+async def handle_invite_code(
+    message: Message, user: User, session: AsyncSession
+) -> None:
     if user.role != UserRole.PENDING:
         return
 
-    session: AsyncSession = data["session"]
-
     if not message.text:
-        message.answer("Invalid code. Please try again.")
+        await message.answer("Invalid code. Please try again.")
         return
 
     code_str = message.text.strip()

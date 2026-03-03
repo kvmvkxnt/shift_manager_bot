@@ -14,8 +14,7 @@ router = Router()
 
 
 @router.message(Command("admin"))
-async def cmd_admin(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
+async def cmd_admin(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
     managers = await service.get_all_managers(session)
@@ -37,9 +36,9 @@ async def cmd_admin(message: Message, data: dict[str, Any]) -> None:
 
 
 @router.message(Command("invite_manager"))
-async def cmd_invite_manager(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
+async def cmd_invite_manager(
+    message: Message, user: User, session: AsyncSession
+) -> None:
     service = InviteCodeService()
 
     code = await service.generate(session, role=UserRole.MANAGER, created_by=user.id)
@@ -54,8 +53,7 @@ async def cmd_invite_manager(message: Message, data: dict[str, Any]) -> None:
 
 
 @router.message(Command("invite_employee"))
-async def cmd_invite_employee(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
+async def cmd_invite_employee(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
     managers = await service.get_all_managers(session)
@@ -74,10 +72,8 @@ async def cmd_invite_employee(message: Message, data: dict[str, Any]) -> None:
     lambda c: c.data and c.data.startswith("invite_employee_manager:")
 )
 async def on_invite_employee_manager(
-    callback: CallbackQuery, data: dict[str, Any]
+    callback: CallbackQuery, user: User, session: AsyncSession
 ) -> None:
-    session: AsyncSession = data["session"]
-    user: User = data["user"]
     if not callback.data:
         return
     manager_id = int(callback.data.split(":")[1])
@@ -100,8 +96,7 @@ async def on_invite_employee_manager(
 
 
 @router.message(Command("all_teams"))
-async def cmd_all_teams(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
+async def cmd_all_teams(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
     teams = await service.get_all_teams(session)
@@ -123,8 +118,7 @@ async def cmd_all_teams(message: Message, data: dict[str, Any]) -> None:
 
 
 @router.message(Command("org_stats"))
-async def cmd_org_stats(message: Message, data: dict[str, Any]) -> None:
-    session: AsyncSession = data["session"]
+async def cmd_org_stats(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
     managers = await service.get_all_managers(session)
