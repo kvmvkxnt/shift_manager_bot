@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from shift_manager_bot.bot.filters import IsManager
 from shift_manager_bot.bot.keyboards.manager import employees_keyboard
 from shift_manager_bot.bot.states import CreateShiftStates, CreateTaskStates
 from shift_manager_bot.database.models.task import TaskStatus
@@ -18,7 +19,7 @@ from shift_manager_bot.services.user_service import UserService
 router = Router()
 
 
-@router.message(Command("my_team"))
+@router.message(IsManager(), Command("my_team"))
 async def cmd_my_team(message: Message, user: User, session: AsyncSession) -> None:
     service = UserService()
 
@@ -35,7 +36,7 @@ async def cmd_my_team(message: Message, user: User, session: AsyncSession) -> No
     await message.answer(text)
 
 
-@router.message(Command("create_shift"))
+@router.message(IsManager(), Command("create_shift"))
 async def cmd_create_shift(message: Message, state: FSMContext) -> None:
     await state.set_state(CreateShiftStates.waiting_for_date)
     await message.answer(
@@ -154,7 +155,7 @@ async def process_shift_note(
 
 
 # Create task FSM
-@router.message(Command("create_task"))
+@router.message(IsManager(), Command("create_task"))
 async def cmd_create_task(message: Message, state: FSMContext) -> None:
     await state.set_state(CreateTaskStates.waiting_for_title)
     await message.answer("Let's create a new task!\n\nPlease enter the task title:")
@@ -250,7 +251,7 @@ async def process_task_deadline(
     )
 
 
-@router.message(Command("invite"))
+@router.message(IsManager(), Command("invite"))
 async def cmd_invite(message: Message, user: User, session: AsyncSession) -> None:
     service = InviteCodeService()
 
@@ -267,7 +268,7 @@ async def cmd_invite(message: Message, user: User, session: AsyncSession) -> Non
     )
 
 
-@router.message(Command("team_stats"))
+@router.message(IsManager(), Command("team_stats"))
 async def cmd_team_stats(message: Message, user: User, session: AsyncSession) -> None:
     shift_service = ShiftService()
     task_service = TaskService()

@@ -4,6 +4,7 @@ from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shift_manager_bot.bot.callbacks import ShiftCallbackData, TaskCallbackData
+from shift_manager_bot.bot.filters import IsEmployee
 from shift_manager_bot.bot.keyboards.employee import shift_keyboard, task_keyboard
 from shift_manager_bot.database.models.shift import (
     AssignmentStatus,
@@ -41,7 +42,7 @@ def format_task_text(task: Task) -> str:
     ).strip()
 
 
-@router.message(Command("my_shifts"))
+@router.message(IsEmployee(), Command("my_shifts"))
 async def cmd_my_shifts(message: Message, user: User, session: AsyncSession) -> None:
     service = ShiftService()
 
@@ -92,7 +93,7 @@ async def on_shift_action(
         )
 
 
-@router.message(Command("my_tasks"))
+@router.message(IsEmployee(), Command("my_tasks"))
 async def cmd_my_tasks(message: Message, user: User, session: AsyncSession) -> None:
     service = TaskService()
 
@@ -133,7 +134,7 @@ async def on_task_action(
         await callback.message.edit_text(format_task_text(task))
 
 
-@router.message(Command("my_stats"))
+@router.message(IsEmployee(), Command("my_stats"))
 async def cmd_my_stats(message: Message, user: User, session: AsyncSession) -> None:
 
     shift_service = ShiftService()

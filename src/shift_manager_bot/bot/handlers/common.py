@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from shift_manager_bot.bot.filters import IsPendingUser
 from shift_manager_bot.database.models.user import User, UserRole
 from shift_manager_bot.services.invite_code_service import InviteCodeService
 from shift_manager_bot.services.user_service import UserService
@@ -91,7 +92,7 @@ async def cmd_help(message: Message, user: User) -> None:
     await message.answer(get_help_text(user))
 
 
-@router.message(lambda message: True)
+@router.message(IsPendingUser())
 async def handle_invite_code(
     message: Message, user: User, session: AsyncSession
 ) -> None:

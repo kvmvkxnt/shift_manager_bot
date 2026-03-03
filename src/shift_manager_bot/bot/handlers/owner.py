@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from shift_manager_bot.bot.filters import IsOwner
 from shift_manager_bot.bot.keyboards.owner import managers_keyboard
 from shift_manager_bot.database.models.user import User, UserRole
 from shift_manager_bot.services.invite_code_service import InviteCodeService
@@ -11,7 +12,7 @@ from shift_manager_bot.services.user_service import UserService
 router = Router()
 
 
-@router.message(Command("admin"))
+@router.message(IsOwner(), Command("admin"))
 async def cmd_admin(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
@@ -33,7 +34,7 @@ async def cmd_admin(message: Message, session: AsyncSession) -> None:
     )
 
 
-@router.message(Command("invite_manager"))
+@router.message(IsOwner(), Command("invite_manager"))
 async def cmd_invite_manager(
     message: Message, user: User, session: AsyncSession
 ) -> None:
@@ -50,7 +51,7 @@ async def cmd_invite_manager(
     )
 
 
-@router.message(Command("invite_employee"))
+@router.message(IsOwner(), Command("invite_employee"))
 async def cmd_invite_employee(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
@@ -93,7 +94,7 @@ async def on_invite_employee_manager(
     )
 
 
-@router.message(Command("all_teams"))
+@router.message(IsOwner(), Command("all_teams"))
 async def cmd_all_teams(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
@@ -115,7 +116,7 @@ async def cmd_all_teams(message: Message, session: AsyncSession) -> None:
     await message.answer("All Teams\n\n" + "\n".join(lines))
 
 
-@router.message(Command("org_stats"))
+@router.message(IsOwner(), Command("org_stats"))
 async def cmd_org_stats(message: Message, session: AsyncSession) -> None:
     service = UserService()
 
