@@ -73,9 +73,8 @@ async def test_start_pending_user_asks_for_invite_code(
 
     tg_user = make_tg_user(user_id=pending_user.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": pending_user}
 
-    await cmd_start(message, data)
+    await cmd_start(message, pending_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -90,9 +89,8 @@ async def test_start_employee_sees_employee_menu(
 
     tg_user = make_tg_user(user_id=employee_user.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": employee_user}
 
-    await cmd_start(message, data)
+    await cmd_start(message, employee_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -107,9 +105,8 @@ async def test_start_manager_sees_manager_menu(
 
     tg_user = make_tg_user(user_id=manager_user.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": manager_user}
 
-    await cmd_start(message, data)
+    await cmd_start(message, manager_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -123,9 +120,8 @@ async def test_help_pending_user(db_session: AsyncSession, pending_user: User) -
 
     tg_user = make_tg_user(user_id=pending_user.telegram_id)
     message = make_message(tg_user, text="/help")
-    data: dict[str, Any] = {"session": db_session, "user": pending_user}
 
-    await cmd_help(message, data)
+    await cmd_help(message, pending_user, db_session)
 
     message.answer.assert_called_once()
 
@@ -136,9 +132,8 @@ async def test_help_employee(db_session: AsyncSession, employee_user: User) -> N
 
     tg_user = make_tg_user(user_id=employee_user.telegram_id)
     message = make_message(tg_user, text="/help")
-    data: dict[str, Any] = {"session": db_session, "user": employee_user}
 
-    await cmd_help(message, data)
+    await cmd_help(message, employee_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -151,9 +146,8 @@ async def test_help_manager(db_session: AsyncSession, manager_user: User) -> Non
 
     tg_user = make_tg_user(user_id=manager_user.telegram_id)
     message = make_message(tg_user, text="/help")
-    data: dict[str, Any] = {"session": db_session, "user": manager_user}
 
-    await cmd_help(message, data)
+    await cmd_help(message, manager_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -187,9 +181,8 @@ async def test_pending_user_enters_valid_code(
 
     tg_user = make_tg_user(user_id=pending_user.telegram_id)
     message = make_message(tg_user, text=code.code)
-    data: dict[str, Any] = {"session": db_session, "user": pending_user}
 
-    await handle_invite_code(message, data)
+    await handle_invite_code(message, pending_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -208,9 +201,8 @@ async def test_pending_user_enters_invalid_code(
 
     tg_user = make_tg_user(user_id=pending_user.telegram_id)
     message = make_message(tg_user, text="INVALID123")
-    data: dict[str, Any] = {"session": db_session, "user": pending_user}
 
-    await handle_invite_code(message, data)
+    await handle_invite_code(message, pending_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -249,9 +241,8 @@ async def test_pending_user_enters_expired_code(
 
     tg_user = make_tg_user(user_id=pending_user.telegram_id)
     message = make_message(tg_user, text=code.code)
-    data: dict[str, Any] = {"session": db_session, "user": pending_user}
 
-    await handle_invite_code(message, data)
+    await handle_invite_code(message, pending_user, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]

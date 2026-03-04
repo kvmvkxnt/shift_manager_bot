@@ -37,7 +37,7 @@ async def cmd_my_team(message: Message, user: User, session: AsyncSession) -> No
 
 
 @router.message(IsManager(), Command("create_shift"))
-async def cmd_create_shift(message: Message, state: FSMContext) -> None:
+async def cmd_create_shift(message: Message, state: FSMContext, user: User) -> None:
     await state.set_state(CreateShiftStates.waiting_for_date)
     await message.answer(
         "Let's create a new shift!\n\nPlease enter the date (format: YYYY-MM-DD):"
@@ -45,7 +45,7 @@ async def cmd_create_shift(message: Message, state: FSMContext) -> None:
 
 
 @router.message(CreateShiftStates.waiting_for_date)
-async def process_shift_date(message: Message, state: FSMContext) -> None:
+async def process_shift_date(message: Message, state: FSMContext, user: User) -> None:
     if not message.text:
         await message.answer(
             "Invalid date format. Please use YYYY-MM-DD (e.g. 2026-01-25):"
@@ -68,7 +68,7 @@ async def process_shift_date(message: Message, state: FSMContext) -> None:
 
 
 @router.message(CreateShiftStates.waiting_for_time)
-async def process_shift_time(message: Message, state: FSMContext) -> None:
+async def process_shift_time(message: Message, state: FSMContext, user: User) -> None:
     if not message.text:
         await message.answer(
             "Invalid time format. Please use HH:MM-HH:MM (e.g. 09:00-17:00):"
@@ -93,7 +93,9 @@ async def process_shift_time(message: Message, state: FSMContext) -> None:
 
 
 @router.message(CreateShiftStates.waiting_for_max_employees)
-async def process_shift_max_employees(message: Message, state: FSMContext) -> None:
+async def process_shift_max_employees(
+    message: Message, state: FSMContext, user: User
+) -> None:
     if not message.text:
         await message.answer("Invalid number. Please enter a positive integer:")
         return
@@ -156,13 +158,13 @@ async def process_shift_note(
 
 # Create task FSM
 @router.message(IsManager(), Command("create_task"))
-async def cmd_create_task(message: Message, state: FSMContext) -> None:
+async def cmd_create_task(message: Message, state: FSMContext, user: User) -> None:
     await state.set_state(CreateTaskStates.waiting_for_title)
     await message.answer("Let's create a new task!\n\nPlease enter the task title:")
 
 
 @router.message(CreateTaskStates.waiting_for_title)
-async def process_task_title(message: Message, state: FSMContext) -> None:
+async def process_task_title(message: Message, state: FSMContext, user: User) -> None:
     if not message.text:
         await message.answer("Please enter the task title:")
         return
@@ -199,7 +201,9 @@ async def process_task_description(
 
 
 @router.callback_query(lambda c: c.data and c.data.startswith("assign_employee:"))
-async def process_task_employee(callback: CallbackQuery, state: FSMContext) -> None:
+async def process_task_employee(
+    callback: CallbackQuery, state: FSMContext, user: User
+) -> None:
     if callback.data:
         employee_id = int(callback.data.split(":")[1])
         await state.update_data(employee_id=employee_id)

@@ -79,9 +79,8 @@ async def test_admin_shows_overview(
 
     tg_user = make_tg_user(owner.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": owner}
 
-    await cmd_admin(message, data)
+    await cmd_admin(message, owner, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -98,9 +97,8 @@ async def test_owner_can_generate_manager_invite(
 
     tg_user = make_tg_user(owner.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": owner}
 
-    await cmd_invite_manager(message, data)
+    await cmd_invite_manager(message, owner, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -117,9 +115,8 @@ async def test_owner_can_generate_employee_invite(
 
     tg_user = make_tg_user(owner.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": owner}
 
-    await cmd_invite_employee(message, data)
+    await cmd_invite_employee(message, owner, db_session)
 
     message.answer.assert_called_once()
 
@@ -136,9 +133,8 @@ async def test_all_teams_shows_managers_and_employees(
 
     tg_user = make_tg_user(owner.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": owner}
 
-    await cmd_all_teams(message, data)
+    await cmd_all_teams(message, owner, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -155,9 +151,8 @@ async def test_all_teams_empty(
 
     tg_user = make_tg_user(owner.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": owner}
 
-    await cmd_all_teams(message, data)
+    await cmd_all_teams(message, owner, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -176,9 +171,8 @@ async def test_org_stats_shows_summary(
 
     tg_user = make_tg_user(owner.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": owner}
 
-    await cmd_org_stats(message, data)
+    await cmd_org_stats(message, owner, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]

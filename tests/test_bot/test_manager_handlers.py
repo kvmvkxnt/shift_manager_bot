@@ -83,9 +83,8 @@ async def test_my_team_shows_employees(
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await cmd_my_team(message, data)
+    await cmd_my_team(message, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -98,9 +97,8 @@ async def test_my_team_empty(db_session: AsyncSession, manager: User) -> None:
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await cmd_my_team(message, data)
+    await cmd_my_team(message, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -116,7 +114,7 @@ async def test_create_shift_start(manager: User) -> None:
     message = make_message(tg_user)
     state = await make_fsm_context()
 
-    await cmd_create_shift(message, state)
+    await cmd_create_shift(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -135,7 +133,7 @@ async def test_create_shift_date_valid(manager: User) -> None:
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_date)
 
-    await process_shift_date(message, state)
+    await process_shift_date(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -153,7 +151,7 @@ async def test_create_shift_date_invalid(manager: User) -> None:
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_date)
 
-    await process_shift_date(message, state)
+    await process_shift_date(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -172,7 +170,7 @@ async def test_create_shift_time_valid(manager: User) -> None:
     await state.set_state(CreateShiftStates.waiting_for_time)
     await state.update_data(date="2026-12-01")
 
-    await process_shift_time(message, state)
+    await process_shift_time(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -191,7 +189,7 @@ async def test_create_shift_time_invalid(manager: User) -> None:
     await state.set_state(CreateShiftStates.waiting_for_time)
     await state.update_data(date="2026-12-01")
 
-    await process_shift_time(message, state)
+    await process_shift_time(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -210,7 +208,7 @@ async def test_create_shift_max_employees_valid(manager: User) -> None:
     await state.set_state(CreateShiftStates.waiting_for_max_employees)
     await state.update_data(date="2026-12-01", time="09:00-17:00")
 
-    await process_shift_max_employees(message, state)
+    await process_shift_max_employees(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -229,7 +227,7 @@ async def test_create_shift_max_employees_invalid(manager: User) -> None:
     await state.set_state(CreateShiftStates.waiting_for_max_employees)
     await state.update_data(date="2026-12-01", time="09:00-17:00")
 
-    await process_shift_max_employees(message, state)
+    await process_shift_max_employees(message, state, manager)
 
     message.answer.assert_called_once()
     current_state = await state.get_state()
@@ -247,9 +245,8 @@ async def test_create_shift_note_and_finish(
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_note)
     await state.update_data(date="2026-12-01", time="09:00-17:00", max_employees=3)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_note(message, state, data)
+    await process_shift_note(message, state, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -267,9 +264,8 @@ async def test_create_shift_skip_note(db_session: AsyncSession, manager: User) -
     state = await make_fsm_context()
     await state.set_state(CreateShiftStates.waiting_for_note)
     await state.update_data(date="2026-12-01", time="09:00-17:00", max_employees=3)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_shift_note(message, state, data)
+    await process_shift_note(message, state, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -287,7 +283,7 @@ async def test_create_task_start(manager: User) -> None:
     message = make_message(tg_user)
     state = await make_fsm_context()
 
-    await cmd_create_task(message, state)
+    await cmd_create_task(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -305,7 +301,7 @@ async def test_create_task_title(manager: User) -> None:
     state = await make_fsm_context()
     await state.set_state(CreateTaskStates.waiting_for_title)
 
-    await process_task_title(message, state)
+    await process_task_title(message, state, manager)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -325,9 +321,8 @@ async def test_create_task_skip_description(
     state = await make_fsm_context()
     await state.set_state(CreateTaskStates.waiting_for_description)
     await state.update_data(title="Clean kitchen")
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_task_description(message, state, data)
+    await process_task_description(message, state, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -346,7 +341,7 @@ async def test_create_task_assign_employee(manager: User, employee: User) -> Non
     await state.set_state(CreateTaskStates.waiting_for_employee)
     await state.update_data(title="Clean kitchen", description=None)
 
-    await process_task_employee(callback, state)
+    await process_task_employee(callback, state, manager)
 
     callback.answer.assert_called_once()
     current_state = await state.get_state()
@@ -370,9 +365,8 @@ async def test_create_task_skip_deadline(
         description=None,
         employee_id=employee.id,
     )
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_task_deadline(message, state, data)
+    await process_task_deadline(message, state, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -398,9 +392,8 @@ async def test_create_task_with_deadline(
         description=None,
         employee_id=employee.id,
     )
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await process_task_deadline(message, state, data)
+    await process_task_deadline(message, state, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -418,9 +411,8 @@ async def test_manager_can_generate_employee_invite(
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await cmd_invite(message, data)
+    await cmd_invite(message, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -476,9 +468,8 @@ async def test_team_stats_shows_summary(
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await cmd_team_stats(message, data)
+    await cmd_team_stats(message, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -497,9 +488,8 @@ async def test_team_stats_shows_correct_counts(
 
     tg_user = make_tg_user(manager.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": manager}
 
-    await cmd_team_stats(message, data)
+    await cmd_team_stats(message, manager, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]

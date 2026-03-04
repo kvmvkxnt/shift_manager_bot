@@ -13,7 +13,7 @@ router = Router()
 
 
 @router.message(IsOwner(), Command("admin"))
-async def cmd_admin(message: Message, session: AsyncSession) -> None:
+async def cmd_admin(message: Message, user: User, session: AsyncSession) -> None:
     service = UserService()
 
     managers = await service.get_all_managers(session)
@@ -52,7 +52,9 @@ async def cmd_invite_manager(
 
 
 @router.message(IsOwner(), Command("invite_employee"))
-async def cmd_invite_employee(message: Message, session: AsyncSession) -> None:
+async def cmd_invite_employee(
+    message: Message, user: User, session: AsyncSession
+) -> None:
     service = UserService()
 
     managers = await service.get_all_managers(session)
@@ -95,7 +97,7 @@ async def on_invite_employee_manager(
 
 
 @router.message(IsOwner(), Command("all_teams"))
-async def cmd_all_teams(message: Message, session: AsyncSession) -> None:
+async def cmd_all_teams(message: Message, user: User, session: AsyncSession) -> None:
     service = UserService()
 
     teams = await service.get_all_teams(session)
@@ -117,7 +119,7 @@ async def cmd_all_teams(message: Message, session: AsyncSession) -> None:
 
 
 @router.message(IsOwner(), Command("org_stats"))
-async def cmd_org_stats(message: Message, session: AsyncSession) -> None:
+async def cmd_org_stats(message: Message, user: User, session: AsyncSession) -> None:
     service = UserService()
 
     managers = await service.get_all_managers(session)

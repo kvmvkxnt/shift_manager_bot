@@ -18,6 +18,20 @@ class DbSessionMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> Any:
-        async with self.session_factory() as session:
+        session = self.session_factory()
+        if hasattr(session, "__aenter__"):
+            async with session as s:
+                data["session"] = s
+                return await handler(event, data)
+        else:
+            # Check if it's a coroutine (test mock)
+            import asyncio
+            if asyncio.iscoroutine(session):
+                session = await session
+            
             data["session"] = session
-            return await handler(event, data)
+            try:
+                return await handler(event, data)
+            finally:
+                if hasattr(session, "close"):
+                    await session.close()

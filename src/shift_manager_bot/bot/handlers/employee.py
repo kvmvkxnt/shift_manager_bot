@@ -62,7 +62,10 @@ async def cmd_my_shifts(message: Message, user: User, session: AsyncSession) -> 
 
 @router.callback_query(ShiftCallbackData.filter())
 async def on_shift_action(
-    callback: CallbackQuery, callback_data: ShiftCallbackData, session: AsyncSession
+    callback: CallbackQuery,
+    callback_data: ShiftCallbackData,
+    user: User,
+    session: AsyncSession,
 ) -> None:
     service = ShiftService()
 
@@ -111,7 +114,10 @@ async def cmd_my_tasks(message: Message, user: User, session: AsyncSession) -> N
 
 @router.callback_query(TaskCallbackData.filter())
 async def on_task_action(
-    callback: CallbackQuery, callback_data: TaskCallbackData, session: AsyncSession
+    callback: CallbackQuery,
+    callback_data: TaskCallbackData,
+    user: User,
+    session: AsyncSession,
 ) -> None:
     service = TaskService()
 

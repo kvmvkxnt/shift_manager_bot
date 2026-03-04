@@ -16,6 +16,11 @@ class AuthMiddleware(BaseMiddleware):
     ) -> Any:
         tg_user: TelegramUser | None = data.get("event_from_user")
         if tg_user is None:
+            # Fallback for older aiogram or custom test setups where event_from_user isn't set
+            if hasattr(event, "from_user"):
+                tg_user = event.from_user
+
+        if tg_user is None:
             return await handler(event, data)
 
         session = data.get("session")

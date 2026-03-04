@@ -117,9 +117,8 @@ async def test_my_shifts_shows_shifts(
 
     tg_user = make_tg_user(employee.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await cmd_my_shifts(message, data)
+    await cmd_my_shifts(message, employee, db_session)
 
     shift, _ = shift_with_assignment
     message.answer.assert_called_once()
@@ -133,9 +132,8 @@ async def test_my_shifts_empty(db_session: AsyncSession, employee: User) -> None
 
     tg_user = make_tg_user(employee.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await cmd_my_shifts(message, data)
+    await cmd_my_shifts(message, employee, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -154,9 +152,8 @@ async def test_confirm_shift(
     tg_user = make_tg_user(employee.telegram_id)
     callback = make_callback(tg_user)
     callback_data = ShiftCallbackData(action="confirm", assignment_id=assignment.id)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await on_shift_action(callback, callback_data, data)
+    await on_shift_action(callback, callback_data, employee, db_session)
 
     await db_session.refresh(assignment)
     assert assignment.status == AssignmentStatus.CONFIRMED
@@ -175,9 +172,8 @@ async def test_decline_shift(
     tg_user = make_tg_user(employee.telegram_id)
     callback = make_callback(tg_user)
     callback_data = ShiftCallbackData(action="decline", assignment_id=assignment.id)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await on_shift_action(callback, callback_data, data)
+    await on_shift_action(callback, callback_data, employee, db_session)
 
     await db_session.refresh(assignment)
     assert assignment.status == AssignmentStatus.DECLINED
@@ -195,9 +191,8 @@ async def test_my_tasks_shows_tasks(
 
     tg_user = make_tg_user(employee.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await cmd_my_tasks(message, data)
+    await cmd_my_tasks(message, employee, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -213,9 +208,8 @@ async def test_my_tasks_empty(
 
     tg_user = make_tg_user(employee.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await cmd_my_tasks(message, data)
+    await cmd_my_tasks(message, employee, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -233,9 +227,8 @@ async def test_update_task_status_to_in_progress(
     tg_user = make_tg_user(employee.telegram_id)
     callback = make_callback(tg_user)
     callback_data = TaskCallbackData(action="in_progress", task_id=employee_task.id)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await on_task_action(callback, callback_data, data)
+    await on_task_action(callback, callback_data, employee, db_session)
 
     await db_session.refresh(employee_task)
     assert employee_task.status == TaskStatus.IN_PROGRESS
@@ -253,9 +246,8 @@ async def test_update_task_status_to_done(
     tg_user = make_tg_user(employee.telegram_id)
     callback = make_callback(tg_user)
     callback_data = TaskCallbackData(action="done", task_id=employee_task.id)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await on_task_action(callback, callback_data, data)
+    await on_task_action(callback, callback_data, employee, db_session)
 
     await db_session.refresh(employee_task)
     assert employee_task.status == TaskStatus.DONE
@@ -321,9 +313,8 @@ async def test_my_stats_shows_summary(
 
     tg_user = make_tg_user(employee.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await cmd_my_stats(message, data)
+    await cmd_my_stats(message, employee, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]
@@ -341,9 +332,8 @@ async def test_my_stats_shows_correct_counts(
 
     tg_user = make_tg_user(employee.telegram_id)
     message = make_message(tg_user)
-    data: dict[str, Any] = {"session": db_session, "user": employee}
 
-    await cmd_my_stats(message, data)
+    await cmd_my_stats(message, employee, db_session)
 
     message.answer.assert_called_once()
     response_text: str = message.answer.call_args[0][0]

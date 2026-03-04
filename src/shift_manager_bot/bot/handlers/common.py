@@ -95,12 +95,12 @@ def get_help_text(user: User) -> str:
 
 
 @router.message(Command("start"))
-async def cmd_start(message: Message, user: User) -> None:
+async def cmd_start(message: Message, user: User, session: AsyncSession) -> None:
     await message.answer(get_start_text(user))
 
 
 @router.message(Command("help"))
-async def cmd_help(message: Message, user: User) -> None:
+async def cmd_help(message: Message, user: User, session: AsyncSession) -> None:
     await message.answer(get_help_text(user))
 
 
